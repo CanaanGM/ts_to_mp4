@@ -8,14 +8,12 @@ use walkdir::WalkDir;
 fn convert_ts_to_mp4(input_path: &Path) {
     let output_path = input_path.with_extension("mp4");
 
-    // Debug: Print the paths to be used in the command
     println!("Input path: {:?}", input_path);
     println!("Output path: {:?}", output_path);
 
     let input_path_str = format!("{}", input_path.to_str().unwrap().replace("\\", "/"));
     let output_path_str = format!("{}", output_path.to_str().unwrap().replace("\\", "/"));
 
-    // Execute ffmpeg with the properly formatted path strings
     let status = Command::new("ffmpeg")
         .arg("-i")
         .arg(input_path.to_str().unwrap())
