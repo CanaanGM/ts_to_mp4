@@ -15,27 +15,23 @@ fn convert_ts_to_mp4(input_path: &Path) {
     let output_path_str = format!("{}", output_path.to_str().unwrap().replace("\\", "/"));
 
     let status = Command::new("ffmpeg")
+        .arg("-hwaccel")
+        .arg("cuda")
         .arg("-i")
-        .arg(input_path.to_str().unwrap())
-        .arg("-c:v")
-        .arg("h264_nvenc")
-        .arg("-preset")
-        .arg("fast")  // Change to 'hq' for higher quality if needed
-        .arg("-profile:v")
-        .arg("high")
-        .arg("-rc:v")
-        .arg("vbr")  // Variable bitrate: good balance of quality and file size
-        .arg("-cq:v")
-        .arg("19")   // Constant Quality mode, 0-51 (0 is lossless, 23 is default, 51 is worst). Lower is better quality.
-        .arg("-b:v")
-        .arg("5M")   // Adjust video bitrate as needed (e.g., 5 Mbps)
-        .arg("-bf")
-        .arg("3")    // Number of B-frames between I and P frames
-        .arg("-g")
-        .arg("120")  // GOP size, good for segmenting video streams
-        .arg(output_path.to_str().unwrap())
+        .arg(&input_path_str)
+        .arg("-codec")
+        .arg("copy")
+        .arg(&output_path_str)
         .status()
         .expect("Failed to execute ffmpeg");
+        // .arg("-i")
+        // .arg(&input_path_str)
+        // .arg("-c:v")
+        // .arg("libx264")
+        // .arg(&output_path_str)
+        // .status()
+        // .expect("Failed to execute ffmpeg");
+
 
     if status.success() {
         println!("Successfully converted: {}", input_path.display());
@@ -72,13 +68,13 @@ fn convert_in_directory(directory: &Path, recursive: bool) {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() < 3 {
+    if args.len() < 2 {
         eprintln!("Usage: {} <directory> [-r]", args[0]);
         std::process::exit(1);
     }
 
     let directory = &args[1];
-    let recursive = args.iter().any(|arg| arg == "-r");
+    let recursive = args.contains(&"-r".to_string());
 
     let directory_path = Path::new(directory);
     if !directory_path.exists() || !directory_path.is_dir() {
